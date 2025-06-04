@@ -24,15 +24,19 @@ parser = argparse.ArgumentParser(
     epilog='''
 Usage examples:
 
-  Basic:
-      python3 psudohash.py -w <keywords> -cpa
-    
-  Thorough:
-      python3 psudohash.py -w <keywords> -cpa -an 3 -y 1990-2022
+  Just single words (no combinations):
+      python3 psudohash.py -w foo,bar -cpa
+
+  Multi-word concatenation enabled:
+      python3 psudohash.py -w foo,bar -c -an 2 -y 2020-2022 -cpa
+
+  Thorough (combinations + all options):
+      python3 psudohash.py -w foo,bar,baz -c -cpa -cpb -an 3 -y 1990-2022
 '''
     )
 
 parser.add_argument("-w", "--words", action="store", help = "Comma seperated keywords to mutate", required = True)
+parser.add_argument("-c", "--combine", action="store_true", help="Enable multi-word concatenation: generate and mutate all joined-together combinations of the provided keywords.")
 parser.add_argument("-an", "--append-numbering", action="store", help = "Append numbering range at the end of each word mutation (before appending year or common paddings).\nThe LEVEL value represents the minimum number of digits. LEVEL must be >= 1. \nSet to 1 will append range: 1,2,3..100\nSet to 2 will append range: 01,02,03..100 + previous\nSet to 3 will append range: 001,002,003..100 + previous.\n\n", type = int, metavar='LEVEL')
 parser.add_argument("-nl", "--numbering-limit", action="store", help = "Change max numbering limit value of option -an. Default is 50. Must be used with -an.", type = int, metavar='LIMIT')
 parser.add_argument("-y", "--years", action="store", help = "Singe OR comma seperated OR range of years to be appended to each word mutation (Example: 2022 OR 1990,2017,2022 OR 1990-2000)")
@@ -561,6 +565,7 @@ def main():
     banner() if not args.quiet else chill()
     
     global basic_mutations, mutations_cage
+
     # 1) Read raw keywords (ignore empty or digit-only)
     raw = []
     for w in args.words.split(','):
@@ -571,18 +576,17 @@ def main():
             exit_with_msg('Unable to mutate digit-only keywords.')
         raw.append(w)
 
-    # 2) Generate all concatenated combinations of those raw keywords
-    #    (combination sizes 1..len(raw), joining with no separator).
-    from itertools import combinations
+    # 2) If --combine was requested, generate all concatenations;
+    #    otherwise, just use each raw word by itself.
+    if args.combine:
+        from itertools import combinations
+        keywords = []
+        for r in range(1, len(raw) + 1):
+            for combo in combinations(raw, r):
+                keywords.append(''.join(combo))
+    else:
+        keywords = list(raw)
 
-    keywords = []
-    for r in range(1, len(raw) + 1):
-        for combo in combinations(raw, r):
-            # e.g. ('foo','bar') → 'foobar'
-            keywords.append(''.join(combo))
-
-    # Now `keywords` contains each single word plus every multi-word concatenation.    
-    
     # Calculate total words and size of output
     total_size = [0, 0]
     

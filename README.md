@@ -1,12 +1,10 @@
-# Fork Notes
-
-# psudohash (fork)
+# psudohash (fork notes)
 
 **This is a fork of [t3l3machus/psudohash](https://github.com/t3l3machus/psudohash).**
 
 **Key differences from the original repository**  
-- ▶️ Added a progress bar in every step to track execution.  
-- 🔗 Support for multi‐word combinations: when you pass more than one keyword via `-w`, this fork concatenates them in all possible combinations (e.g. with `-w foo,bar,baz` it will generate and mutate `foo`, `bar`, `baz`, `foobar`, `foobaz`, `barbaz`, and `foobarbaz`).  
+▶️ Added a progress bar in every step to track execution.  
+🔗 Optional multi‐word combinations: pass `-c` to concatenate keywords into all combinations (e.g. `foo,bar,baz` → `foo`,`bar`,`baz`,`foobar`,`foobaz`,`barbaz`,`foobarbaz`); omit `-c` to treat each keyword separately.
 
 **Why this fork exists**  
 To improve user feedback and to allow generating mutations of keyword‐concatenations in a single run (e.g. `-w foo,bar` now produces `foo`, `bar`, and `foobar` mutations automatically).  
