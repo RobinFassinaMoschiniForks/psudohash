@@ -1,3 +1,18 @@
+# Fork Notes
+
+# psudohash (fork)
+
+**This is a fork of [t3l3machus/psudohash](https://github.com/t3l3machus/psudohash).**
+
+**Key differences from the original repository**  
+- ▶️ Added a progress bar in every step to track execution.  
+- 🔗 Support for multi‐word combinations: when you pass more than one keyword via `-w`, this fork concatenates them in all possible combinations (e.g. with `-w foo,bar,baz` it will generate and mutate `foo`, `bar`, `baz`, `foobar`, `foobaz`, `barbaz`, and `foobarbaz`).  
+
+**Why this fork exists**  
+To improve user feedback and to allow generating mutations of keyword‐concatenations in a single run (e.g. `-w foo,bar` now produces `foo`, `bar`, and `foobar` mutations automatically).  
+
+---
+
 # psudohash
 [![Python 3.x](https://img.shields.io/badge/python-3.x-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-red.svg)](https://github.com/t3l3machus/psudohash/blob/main/LICENSE) 
 <img src="https://img.shields.io/badge/Maintained%3F-Yes-23a82c">
