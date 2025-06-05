@@ -9,6 +9,9 @@
 - **All-order combinations** (`-c` / `--combinations`): generate every ordering of each subset (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barfoo, …, bazbarfoo`).
 - **Custom separator** (`--sep <string>`): when joining words, insert this string between tokens (defaults to no separator).
 - **Max combine size** (`--max-combine <N>`): limit how many raw keywords get joined together (default: 2).
+- **Min/Max length filtering of final words** (`--minlen/--maxlen <N>`): filter the final wordlist only with word with the desired length.
+	
+**TODO:** Calculate correctly the size of wordlist that will generated. 
 
 **Why this fork exists**  
 To improve user feedback and to allow generating mutations of keyword‐concatenations in a single run (e.g. `-w foo,bar` now produces `foo`, `bar`, and `foobar` mutations automatically).  

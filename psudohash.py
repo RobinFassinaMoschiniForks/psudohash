@@ -50,6 +50,8 @@ parser.add_argument("-w", "--words", action="store", help = "Comma seperated key
 parser.add_argument("-i", "--inorder", action="store_true", help="Join keywords only in the order given: for each 1≤r≤max_combine, concatenate each r-subset in original sequence.")
 parser.add_argument("-c", "--combinations", action="store_true", help="Generate every ordering of every subset (up to max_combine) of the provided keywords.")
 parser.add_argument("--max-combine", type=int, default=2, help="Maximum number of raw keywords to join into one base string (default: 2). Applies when using -i or -c.")
+parser.add_argument("--minlen", type=int, help="Minimum length (inclusive) of any resulting password. Mutations shorter than this are skipped.")
+parser.add_argument("--maxlen", type=int, help="Maximum length (inclusive) of any resulting password. Mutations longer than this are skipped.")
 parser.add_argument("-an", "--append-numbering", action="store", help = "Append numbering range at the end of each word mutation (before appending year or common paddings).\nThe LEVEL value represents the minimum number of digits. LEVEL must be >= 1. \nSet to 1 will append range: 1,2,3..100\nSet to 2 will append range: 01,02,03..100 + previous\nSet to 3 will append range: 001,002,003..100 + previous.\n\n", type = int, metavar='LEVEL')
 parser.add_argument("-nl", "--numbering-limit", action="store", help = "Change max numbering limit value of option -an. Default is 50. Must be used with -an.", type = int, metavar='LIMIT')
 parser.add_argument("-y", "--years", action="store", help = "Singe OR comma seperated OR range of years to be appended to each word mutation (Example: 2022 OR 1990,2017,2022 OR 1990-2000)")
@@ -300,7 +302,13 @@ def mutations_handler(kword, trans_chars, total):
          tqdm(total=len(basic_mutations), desc=desc, leave=False) as pbar:
 
         for m in basic_mutations:
-            wordlist.write(m + '\n')
+            # Only final‐filter if no numbering/years/padding follow
+            if not args.append_numbering and not args.years and not (args.common_paddings_after or args.common_paddings_before):
+                if not (args.minlen and len(m) < args.minlen) \
+                   and not (args.maxlen and len(m) > args.maxlen):
+                    wordlist.write(m + '\n')
+            else:
+                wordlist.write(m + '\n')
             pbar.update(1)
 
     print(f"{desc}... [100.0%]")
@@ -327,7 +335,15 @@ def caseMutationsHandler(word, mutability):
         for m in case_mutations:
             basic_mutations.append(m)
             if not mutability:
-                wordlist.write(m + '\n')
+                # Only final‐filter if no substitutions/numbering/years/padding follow
+                if not args.combinations and not args.inorder \
+                   and not args.append_numbering and not args.years \
+                   and not (args.common_paddings_after or args.common_paddings_before):
+                    if not (args.minlen and len(m) < args.minlen) \
+                       and not (args.maxlen and len(m) > args.maxlen):
+                        wordlist.write(m + '\n')
+                else:
+                    wordlist.write(m + '\n')
             pbar.update(1)
 
     print(f"{desc}... [100.0%]")
@@ -358,10 +374,39 @@ def append_numbering():
                     line2 = f"{word}_{num_z}\n"
 
                     if first_cycle:
-                        wordlist.write(line1)
-                        wordlist.write(line2)
+                        # Only final‐filter if no years or padding follow
+                        if not args.years and not (args.common_paddings_after or args.common_paddings_before):
+                            if not (args.minlen and len(line1) < args.minlen) \
+                               and not (args.maxlen and len(line1) > args.maxlen):
+                                wordlist.write(line1)
+                                pbar.update(1)
+                            else:
+                                pbar.update(1)
+                            if not (args.minlen and len(line2) < args.minlen) \
+                               and not (args.maxlen and len(line2) > args.maxlen):
+                                wordlist.write(line2)
+                                pbar.update(1)
+                            else:
+                                pbar.update(1)
+                        else:
+                            if not args.years and not (args.common_paddings_after or args.common_paddings_before):
+                                if not (args.minlen and len(line1) < args.minlen) \
+                                   and not (args.maxlen and len(line1) > args.maxlen):
+                                    wordlist.write(line1)
+                                    pbar.update(1)
+                                else:
+                                    pbar.update(1)
+                                if not (args.minlen and len(line2) < args.minlen) \
+                                   and not (args.maxlen and len(line2) > args.maxlen):
+                                    wordlist.write(line2)
+                                    pbar.update(1)
+                                else:
+                                    pbar.update(1)
+                            else:
+                                wordlist.write(line1)
+                                wordlist.write(line2)
+                                pbar.update(2)
                         previous_list.append(f"{word}{num_z}")
-                        pbar.update(2)
                     else:
                         if previous_list[k - 1] != f"{word}{num_z}":
                             wordlist.write(line1)
@@ -393,11 +438,25 @@ def mutate_years():
                 for sep in year_separators:
                     full = f"{word}{sep}{y}\n"
                     short = f"{word}{sep}{y[2:]}\n"
-                    wordlist.write(full)
-                    basic_mutations.append(full.strip())
-                    wordlist.write(short)
-                    basic_mutations.append(short.strip())
-                    pbar.update(2)
+                    # Only final-filter if no padding follows
+                    if not (args.common_paddings_after or args.common_paddings_before):
+                        if not (args.minlen and len(full) < args.minlen) \
+                           and not (args.maxlen and len(full) > args.maxlen):
+                            wordlist.write(full)
+                            basic_mutations.append(full.strip())
+                        # count one for pbar regardless
+                        pbar.update(1)
+                        if not (args.minlen and len(short) < args.minlen) \
+                           and not (args.maxlen and len(short) > args.maxlen):
+                            wordlist.write(short)
+                            basic_mutations.append(short.strip())
+                        pbar.update(1)
+                    else:
+                        wordlist.write(full)
+                        basic_mutations.append(full.strip())
+                        wordlist.write(short)
+                        basic_mutations.append(short.strip())
+                        pbar.update(2)
 
     print(f"{desc}... [100.0%]")
 
@@ -454,13 +513,30 @@ def append_paddings_after():
         for word in current_mutations:
             for val in common_paddings:
                 line1 = f"{word}{val}\n"
-                wordlist.write(line1)
-                pbar.update(1)
+                # Only final-filter if no before-padding
+                if not args.common_paddings_before:
+                    if not (args.minlen and len(line1) < args.minlen) \
+                       and not (args.maxlen and len(line1) > args.maxlen):
+                        wordlist.write(line1)
+                        pbar.update(1)
+                    else:
+                        pbar.update(1)
+                else:
+                    wordlist.write(line1)
+                    pbar.update(1)
 
                 if not check_underscore(val, 0):
                     line2 = f"{word}_{val}\n"
-                    wordlist.write(line2)
-                    pbar.update(1)
+                    if not args.common_paddings_before:
+                        if not (args.minlen and len(line2) < args.minlen) \
+                           and not (args.maxlen and len(line2) > args.maxlen):
+                            wordlist.write(line2)
+                            pbar.update(1)
+                        else:
+                            pbar.update(1)
+                    else:
+                        wordlist.write(line2)
+                        pbar.update(1)
 
     print(f"{desc}... [100.0%]")
 
