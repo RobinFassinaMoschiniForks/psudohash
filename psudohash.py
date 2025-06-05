@@ -159,7 +159,7 @@ def banner():
         if charset < 2: final.append('\n   ')
 
     print(f"   {''.join(final)}")
-    print(f'{END}{padding}                        by t3l3machus\n')
+    print(f'{END}{padding}                        by t3l3machus(modified by DavidAngelos)\n')
 
 
 # ----------------( Base Settings )---------------- #
@@ -701,8 +701,13 @@ def main():
     print(f'[{MAIN}Info{END}] Calculating output length and size...')
 
     # Inform user about the output size
+    if args.minlen or args.maxlen:
+        prompt = (f'[{ORANGE}Warning{END}] Exact final size cannot be determined because min/max-length filtering is active. Without filtering, this would produce {BOLD}{total_size[0]}{END} words, {BOLD}{fsize}{END}. Continue? [y/n]: ')
+    else:
+        prompt = (f'[{ORANGE}Warning{END}] This operation will produce {BOLD}{total_size[0]}{END} words, {BOLD}{fsize}{END}. Are you sure you want to proceed? [y/n]: ')
+
     try:
-        concent = input(f'[{ORANGE}Warning{END}] This operation will produce {BOLD}{total_size[0]}{END} words, {BOLD}{fsize}{END}. Are you sure you want to proceed? [y/n]: ')
+        concent = input(prompt)
     except KeyboardInterrupt:
         exit('\n')
     
