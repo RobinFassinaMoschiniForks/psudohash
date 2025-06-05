@@ -159,7 +159,7 @@ def banner():
         if charset < 2: final.append('\n   ')
 
     print(f"   {''.join(final)}")
-    print(f'{END}{padding}                        by t3l3machus(modified by DavidAngelos)\n')
+    print(f'{END}{padding}                        by t3l3machus(modified by Angelos)\n')
 
 
 # ----------------( Base Settings )---------------- #
