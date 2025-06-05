@@ -24,19 +24,32 @@ parser = argparse.ArgumentParser(
     epilog='''
 Usage examples:
 
-  Just single words (no combinations):
-      python3 psudohash.py -w foo,bar -cpa
+  # 1) No multi-word: treat each keyword separately
+      python3 psudohash.py -w foo,bar,baz -cpa
+      # → foo, bar, baz
 
-  Multi-word concatenation enabled:
-      python3 psudohash.py -w foo,bar -c -an 2 -y 2020-2022 -cpa
+  # 2) In-order joins (-i): up to 2 words by default
+      python3 psudohash.py -w foo,bar,baz -i
+      # → foo, bar, baz, foobar, foobaz, barbaz
 
-  Thorough (combinations + all options):
-      python3 psudohash.py -w foo,bar,baz -c -cpa -cpb -an 3 -y 1990-2022
+  # 3) All-order combinations (-c): up to 2 words by default
+      python3 psudohash.py -w foo,bar,baz -c
+      # → foo, bar, baz, foobar, foobaz, barfoo, barbaz, bazfoo, bazbar
+
+  # 4) Change separator between joined words
+      python3 psudohash.py -w foo,bar,baz -i --sep "_"
+      # → foo, bar, baz, foo_bar, foo_baz, bar_baz, foo_bar_baz
+
+  # 5) Combine up to 3 words (instead of default 2)
+      python3 psudohash.py -w foo,bar,baz -i --max-combine 3
+      # → foo, bar, baz, foobar, foobaz, barbaz, foobarbaz, ...
 '''
     )
 
 parser.add_argument("-w", "--words", action="store", help = "Comma seperated keywords to mutate", required = True)
-parser.add_argument("-c", "--combine", action="store_true", help="Enable multi-word concatenation: generate and mutate all joined-together combinations of the provided keywords.")
+parser.add_argument("-i", "--inorder", action="store_true", help="Join keywords only in the order given: for each 1≤r≤max_combine, concatenate each r-subset in original sequence.")
+parser.add_argument("-c", "--combinations", action="store_true", help="Generate every ordering of every subset (up to max_combine) of the provided keywords.")
+parser.add_argument("--max-combine", type=int, default=2, help="Maximum number of raw keywords to join into one base string (default: 2). Applies when using -i or -c.")
 parser.add_argument("-an", "--append-numbering", action="store", help = "Append numbering range at the end of each word mutation (before appending year or common paddings).\nThe LEVEL value represents the minimum number of digits. LEVEL must be >= 1. \nSet to 1 will append range: 1,2,3..100\nSet to 2 will append range: 01,02,03..100 + previous\nSet to 3 will append range: 001,002,003..100 + previous.\n\n", type = int, metavar='LEVEL')
 parser.add_argument("-nl", "--numbering-limit", action="store", help = "Change max numbering limit value of option -an. Default is 50. Must be used with -an.", type = int, metavar='LIMIT')
 parser.add_argument("-y", "--years", action="store", help = "Singe OR comma seperated OR range of years to be appended to each word mutation (Example: 2022 OR 1990,2017,2022 OR 1990-2000)")
@@ -576,14 +589,24 @@ def main():
             exit_with_msg('Unable to mutate digit-only keywords.')
         raw.append(w)
 
-    # 2) If --combine was requested, generate all concatenations;
-    #    otherwise, just use each raw word by itself.
-    if args.combine:
-        from itertools import combinations
-        keywords = []
-        for r in range(1, len(raw) + 1):
+    # 2) Build "base" keywords according to flags:
+    #    - If --inorder: join each r-subset in the given order, for r=1..max_combine.
+    #    - Elif --combinations: for each r-subset (1..max_combine), generate every permutation.
+    #    - Else: treat each raw word on its own.
+    from itertools import combinations, permutations
+
+    keywords = []
+    limit = min(len(raw), args.max_combine)
+
+    if args.inorder:
+        for r in range(1, limit + 1):
             for combo in combinations(raw, r):
                 keywords.append(''.join(combo))
+    elif args.combinations:
+        for r in range(1, limit + 1):
+            for combo in combinations(raw, r):
+                for perm in permutations(combo):
+                    keywords.append(''.join(perm))
     else:
         keywords = list(raw)
 

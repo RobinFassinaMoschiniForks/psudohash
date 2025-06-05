@@ -4,7 +4,11 @@
 
 **Key differences from the original repository**  
 ▶️ Added a progress bar in every step to track execution.  
-🔗 Optional multi‐word combinations: pass `-c` to concatenate keywords into all combinations (e.g. `foo,bar,baz` → `foo`,`bar`,`baz`,`foobar`,`foobaz`,`barbaz`,`foobarbaz`); omit `-c` to treat each keyword separately.
+▶️Added options:
+- **In-order joins** (`-i` / `--inorder`): join keywords only in the original order (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barbaz, foobarbaz`).
+- **All-order combinations** (`-c` / `--combinations`): generate every ordering of each subset (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barfoo, …, bazbarfoo`).
+- **Custom separator** (`--sep <string>`): when joining words, insert this string between tokens (defaults to no separator).
+- **Max combine size** (`--max-combine <N>`): limit how many raw keywords get joined together (default: 2).
 
 **Why this fork exists**  
 To improve user feedback and to allow generating mutations of keyword‐concatenations in a single run (e.g. `-w foo,bar` now produces `foo`, `bar`, and `foobar` mutations automatically).  
@@ -59,9 +63,42 @@ chmod +x psudohash.py
 ```  
 ## Usage
 ```
-./psudohash.py [-h] -w WORDS [-an LEVEL] [-nl LIMIT] [-y YEARS] [-ap VALUES] [-cpb] [-cpa] [-cpo] [-o FILENAME] [-q]
+./psudohash.py [-h] -w WORDS [-i] [-c] [--sep SEP] [--max-combine N] [-an LEVEL] [-nl LIMIT] [-y YEARS] [-ap VALUES] [-cpb] [-cpa] [-cpo] [-o FILENAME] [-q]
 ```
 The help dialog [ -h, --help ] includes usage details and examples.
+
+### Usage Examples
+
+1. **No multi‐word (singletons only)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -cpa
+   # → foo, bar, baz
+   ```
+
+2. **In‐order joins (-i, up to 2 words by default)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -i
+   # → foo, bar, baz, foobar, foobaz, barbaz
+   ```
+
+3. **All‐order combinations (-c, up to 2 words by default)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -c
+   # → foo, bar, baz, foobar, foobaz, barfoo, barbaz, bazfoo, bazbar
+   ```
+
+4. **Change separator between joined words**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -i --sep "_"
+   # → foo, bar, baz, foo_bar, foo_baz, bar_baz
+   ```
+
+5. **Combine up to 3 words (instead of default 2)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -i --max-combine 3
+   # → foo, bar, baz, foobar, foobaz, barbaz, foobarbaz
+   ```
+
 ## Usage Tips
 1. Combining options `--years` and `--append-numbering` with a `--numbering-limit` ≥ last two digits of any year input, will most likely produce duplicate words because of the mutation patterns implemented by the tool. 
 2. If you add custom padding values and/or modify the predefined common padding values in the source code, in combination with multiple optional parameters, there is a small chance of duplicate words occurring. psudohash includes word filtering controls but for speed's sake, those are limited.
