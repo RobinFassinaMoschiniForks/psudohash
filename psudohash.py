@@ -426,8 +426,8 @@ def mutate_years():
     global basic_mutations
     current_mutations = basic_mutations.copy()
 
-    # total lines = len(current_mutations) * len(years) * len(year_separators) * 2
-    total_lines = len(current_mutations) * len(years) * len(year_separators) * 2
+    # total lines = len(current_mutations) * len(years) * len(year_seperators) * 2
+    total_lines = len(current_mutations) * len(years) * len(year_seperators) * 2
     desc = " ├─ Appending year patterns after each word mutation"
 
     with open(outfile, 'a') as wordlist, \
@@ -435,7 +435,7 @@ def mutate_years():
 
         for word in current_mutations:
             for y in years:
-                for sep in year_separators:
+                for sep in year_seperators:
                     full = f"{word}{sep}{y}\n"
                     short = f"{word}{sep}{y[2:]}\n"
                     # Only final-filter if no padding follows
