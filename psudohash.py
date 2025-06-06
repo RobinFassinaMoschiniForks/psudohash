@@ -52,6 +52,7 @@ parser.add_argument("-c", "--combinations", action="store_true", help="Generate 
 parser.add_argument("--max-combine", type=int, default=2, help="Maximum number of raw keywords to join into one base string (default: 2). Applies when using -i or -c.")
 parser.add_argument("--minlen", type=int, help="Minimum length (inclusive) of any resulting password. Mutations shorter than this are skipped.")
 parser.add_argument("--maxlen", type=int, help="Maximum length (inclusive) of any resulting password. Mutations longer than this are skipped.")
+parser.add_argument("--sep", type=str, default="", help="Separator to insert between joined keywords (default: no separator).")
 parser.add_argument("-an", "--append-numbering", action="store", help = "Append numbering range at the end of each word mutation (before appending year or common paddings).\nThe LEVEL value represents the minimum number of digits. LEVEL must be >= 1. \nSet to 1 will append range: 1,2,3..100\nSet to 2 will append range: 01,02,03..100 + previous\nSet to 3 will append range: 001,002,003..100 + previous.\n\n", type = int, metavar='LEVEL')
 parser.add_argument("-nl", "--numbering-limit", action="store", help = "Change max numbering limit value of option -an. Default is 50. Must be used with -an.", type = int, metavar='LIMIT')
 parser.add_argument("-y", "--years", action="store", help = "Singe OR comma seperated OR range of years to be appended to each word mutation (Example: 2022 OR 1990,2017,2022 OR 1990-2000)")
@@ -677,12 +678,12 @@ def main():
     if args.inorder:
         for r in range(1, limit + 1):
             for combo in combinations(raw, r):
-                keywords.append(''.join(combo))
+                keywords.append(args.sep.join(combo))
     elif args.combinations:
         for r in range(1, limit + 1):
             for combo in combinations(raw, r):
                 for perm in permutations(combo):
-                    keywords.append(''.join(perm))
+                    keywords.append(args.sep.join(perm))
     else:
         keywords = list(raw)
 
