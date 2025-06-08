@@ -1,3 +1,22 @@
+# psudohash (fork notes)
+
+**This is a fork of [t3l3machus/psudohash](https://github.com/t3l3machus/psudohash).**
+
+**Key differences from the original repository**  
+▶️ Added a progress bar in every step to track execution.  
+▶️Added options:
+- **In-order joins** (`-i` / `--inorder`): join keywords only in the original order (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barbaz, foobarbaz`).
+- **All-order combinations** (`-c` / `--combinations`): generate every ordering of each subset (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barfoo, …, bazbarfoo`).
+- **Custom separator** (`--sep <string>`): when joining words, insert this string between tokens (defaults to no separator).
+- **Max combine size** (`--max-combine <N>`): limit how many raw keywords get joined together (default: 2).
+- **Min/Max length filtering of final words** (`--minlen/--maxlen <N>`): filter the final wordlist only with word with the desired length.
+	
+
+**Why this fork exists**  
+To improve user feedback and to allow generating mutations of keyword‐concatenations in a single run (e.g. `-w foo,bar` now produces `foo`, `bar`, and `foobar` mutations automatically).  
+
+---
+
 # psudohash
 [![Python 3.x](https://img.shields.io/badge/python-3.x-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-red.svg)](https://github.com/t3l3machus/psudohash/blob/main/LICENSE) 
 <img src="https://img.shields.io/badge/Maintained%3F-Yes-23a82c">
@@ -38,20 +57,113 @@ year_seperators = ['', '_', '-', '@']
 For example, if the given keyword is "amazon" and option `-y 2023` was used, the output will include "amazon2023", "amazon_2023", "amazon-2023", "amazon@2023", "amazon23", "amazon_23", "amazon-23", "amazon@23".
 
 ## Installation
-No special requirements. Just clone the repo and make the script executable:
+Install Python 3.x and `tqdm` first:
+
+```bash
+pip3 install tqdm
 ```
-git clone https://github.com/t3l3machus/psudohash
+Then clone the repo and make the script executable:
+```
+git clone https://github.com/DavidAngelos/psudohash.git
 cd ./psudohash
 chmod +x psudohash.py
 ```  
 ## Usage
 ```
-./psudohash.py [-h] -w WORDS [-an LEVEL] [-nl LIMIT] [-y YEARS] [-ap VALUES] [-cpb] [-cpa] [-cpo] [-o FILENAME] [-q]
+./psudohash.py [-h] -w WORDS [-i] [-c] [--sep SEP] [--max-combine N] [-an LEVEL] [-nl LIMIT] [-y YEARS] [-ap VALUES] [-cpb] [-cpa] [-cpo] [-o FILENAME] [-q]
 ```
 The help dialog [ -h, --help ] includes usage details and examples.
+
+## Options
+
+- **`-w, --words <kw1,kw2,…>`**  
+  Comma‐separated raw keywords (required).
+
+- **`-i, --inorder`**  
+  Join up to `--max-combine` keywords in the given order (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barbaz, foobarbaz`).
+
+- **`-c, --combinations`**  
+  Generate every permutation of each subset (up to `--max-combine`) (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barfoo, …`).
+
+- **`--max-combine <N>`** (default: 2)  
+  Maximum number of raw keywords to join into one base string.
+
+- **`--sep <string>`**  
+  When joining words (`-i` or `-c`), place this string between tokens. Defaults to an empty string.
+
+- **`--minlen <N>`**  
+  Discard any final password shorter than N characters.
+
+- **`--maxlen <N>`**  
+  Discard any final password longer than N characters.
+
+- **`-an, --append-numbering <LEVEL>`**  
+  Append numbered suffixes (zero‐padded to `<LEVEL>` digits) to each word mutation.
+
+- **`-nl, --numbering-limit <LIMIT>`**  
+  Maximum number to count up to when appending numbers (default: 50).
+
+- **`-y, --years <years>`**  
+  Append one or more years to each mutation (e.g. `1990-2000`, or `2022,2023`).
+
+- **`-ap, --append-padding <vals>`**  
+  Append custom padding values (comma‐separated). Must be used with `-cpb` or `-cpa`.
+
+- **`-cpb, --common-paddings-before`**  
+  Prepend values from `common_padding_values.txt` before each mutation.
+
+- **`-cpa, --common-paddings-after`**  
+  Append values from `common_padding_values.txt` after each mutation.
+
+- **`-cpo, --custom-paddings-only`**  
+  Use only user‐provided paddings (no defaults). Must be used with `-ap`.
+
+- **`-o, --output <file>`**  
+  Write the results to `<file>` (default: `output.txt`).
+
+- **`-q, --quiet`**  
+  Suppress the ASCII art banner on startup.
+
+
+### Usage Examples
+
+1. **No multi‐word (singletons only)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -cpa
+   # → foo, bar, baz
+   ```
+
+2. **In‐order joins (-i, up to 2 words by default)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -i
+   # → foo, bar, baz, foobar, foobaz, barbaz
+   ```
+
+3. **All‐order combinations (-c, up to 2 words by default)**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -c
+   # → foo, bar, baz, foobar, foobaz, barfoo, barbaz, bazfoo, bazbar
+   ```
+
+4. **Change separator between joined words**  
+   ```bash
+   ./psudohash.py -w foo,bar,baz -i --sep "_"
+   # → foo, bar, baz, foo_bar, foo_baz, bar_baz
+   ```
+
+5. **Length Filtering (`--minlen`/`--maxlen`)**  
+   ```bash
+	./psudohash.py -w apple,banana -i --minlen 10
+	# Warning: exact size cannot be determined because of length filters.
+	# Example final outputs might include “applebanana” (11 chars), “bananaapple” (11 chars).
+   ```
+
+6. **Combine up to 3 words (instead of default 2)**  
+
 ## Usage Tips
 1. Combining options `--years` and `--append-numbering` with a `--numbering-limit` ≥ last two digits of any year input, will most likely produce duplicate words because of the mutation patterns implemented by the tool. 
 2. If you add custom padding values and/or modify the predefined common padding values in the source code, in combination with multiple optional parameters, there is a small chance of duplicate words occurring. psudohash includes word filtering controls but for speed's sake, those are limited.
+3. When using `--minlen` or `--maxlen`, the script cannot pre-calculate the exact word count; you’ll see a “exact size cannot be determined” warning and the size without this filter will be calculated, the final size will be smaller.
 
 ## Individuals
 When it comes to people, i think we all have (more or less) set passwords using a mutation of one or more words that mean something to us e.g., our name or wife/kid/pet/band names, sticking the year we were born at the end or maybe a super secure padding like "!@#". Well, guess what?
