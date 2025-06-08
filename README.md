@@ -1,26 +1,17 @@
-# psudohash (fork notes)
+# psudohash
+[![Python 3.x](https://img.shields.io/badge/python-3.x-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-red.svg)](https://github.com/t3l3machus/psudohash/blob/main/LICENSE) 
+<img src="https://img.shields.io/badge/Maintained%3F-Yes-23a82c">
+<img src="https://img.shields.io/badge/Developed%20on-kali%20linux-blueviolet">  
 
-**This is a fork of [t3l3machus/psudohash](https://github.com/t3l3machus/psudohash).**
-
-**Key differences from the original repository**  
+## Cool New Features of v1.1.0
+Special thanks to [DavidAngelos](https://github.com/DavidAngelos):  
 ▶️ Added a progress bar in every step to track execution.  
-▶️Added options:
+▶️ Added options:
 - **In-order joins** (`-i` / `--inorder`): join keywords only in the original order (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barbaz, foobarbaz`).
 - **All-order combinations** (`-c` / `--combinations`): generate every ordering of each subset (e.g. `foo,bar,baz` → `foo, bar, baz, foobar, foobaz, barfoo, …, bazbarfoo`).
 - **Custom separator** (`--sep <string>`): when joining words, insert this string between tokens (defaults to no separator).
 - **Max combine size** (`--max-combine <N>`): limit how many raw keywords get joined together (default: 2).
 - **Min/Max length filtering of final words** (`--minlen/--maxlen <N>`): filter the final wordlist only with word with the desired length.
-	
-
-**Why this fork exists**  
-To improve user feedback and to allow generating mutations of keyword‐concatenations in a single run (e.g. `-w foo,bar` now produces `foo`, `bar`, and `foobar` mutations automatically).  
-
----
-
-# psudohash
-[![Python 3.x](https://img.shields.io/badge/python-3.x-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-red.svg)](https://github.com/t3l3machus/psudohash/blob/main/LICENSE) 
-<img src="https://img.shields.io/badge/Maintained%3F-Yes-23a82c">
-<img src="https://img.shields.io/badge/Developed%20on-kali%20linux-blueviolet">  
 
 ## Purpose
 Psudohash is a password list generator for orchestrating brute force attacks and cracking hashes. It imitates certain password creation patterns commonly used by humans, like substituting a word's letters with symbols or numbers (leet), using char-case variations, adding a common padding before or after the main passphrase and more. It is keyword-based and highly customizable. 🎥 -> [Video Presentation](https://www.youtube.com/watch?v=oj3zjApOOGc)
@@ -64,7 +55,7 @@ pip3 install tqdm
 ```
 Then clone the repo and make the script executable:
 ```
-git clone https://github.com/DavidAngelos/psudohash.git
+git clone https://github.com/t3l3machus/psudohash.git
 cd ./psudohash
 chmod +x psudohash.py
 ```  
